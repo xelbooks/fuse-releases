@@ -47,4 +47,4 @@ This repository holds published builds and nothing else. Fuse is proprietary
 software; its source is not public, and no licence to copy, modify or
 redistribute these binaries is granted by their presence here.
 
-Published by Xelbooks LLC d/b/a Brandenacity, Fayetteville, North Carolina.
+Published by Xelbooks LLC dba Brandenacity, Fayetteville, North Carolina.
