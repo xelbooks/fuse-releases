@@ -129,6 +129,20 @@ bin="$(printf '%s\n' "$files" | grep -E '^/usr/bin/' | head -n1 || true)"
     Run this to reinstall it and see the reason:
       sudo apt-get -y --reinstall install ${PKG}"
 
+# ChromeOS hands its Linux VM a Wayland compositor with no GPU device behind
+# it. Chromium picks Wayland, cannot find a DRM render node, and the window
+# dies the moment it is created — the app boots all the way through, quits when
+# its last window closes, and leaves a spinner going in the shelf with nothing
+# to show for it. Xwayland is right there and works, so ask for it by name.
+#
+# Only on ChromeOS: on an ordinary Linux desktop Wayland is the better path and
+# forcing X11 would be a downgrade.
+FLAGS=""
+if [ -d /opt/google/cros-containers ] || [ -e /dev/.cros_milestone ]; then
+  FLAGS=" --ozone-platform=x11"
+  note "ChromeOS detected — starting Fuse under X11, which is the display it has."
+fi
+
 # Prefer a big icon: the launcher scales down cleanly and up badly.
 icon="$(printf '%s\n' "$files" | grep -E '/icons/hicolor/[0-9]+x[0-9]+/apps/.*\.png$' \
          | sort -t/ -k6 -V | tail -n1 || true)"
@@ -153,6 +167,19 @@ if [ -n "$icon" ]; then
   done <<< "$(printf '%s\n' "$files" | grep -E '/icons/hicolor/[0-9]+x[0-9]+/apps/.*\.png$' || true)"
 fi
 
+# Clear out any other entry of our own that points at the same program. Pinning
+# an app that ChromeOS launched from a terminal can leave a second shortcut
+# behind, and a stale one that starts Fuse the wrong way is indistinguishable
+# from the right one until you click it. Scoped deliberately: this directory
+# only, .desktop files only, and only ones whose Exec runs our binary.
+for old in "${apps}"/*.desktop; do
+  [ -f "$old" ] || continue
+  [ "$old" = "$entry" ] && continue
+  grep -qE "^Exec=.*(${PKG}|/opt/[Ff]use/)" "$old" 2>/dev/null || continue
+  note "removing an older shortcut: $(basename "$old")"
+  rm -f "$old"
+done
+
 # Deleting first matters: ChromeOS caches launcher entries by path and will
 # happily keep serving a stale one it has already read.
 #
@@ -168,7 +195,7 @@ Version=1.0
 Name=Fuse
 GenericName=Web Browser
 Comment=A browser that replaces tabs with groups
-Exec=${bin} %U
+Exec=${bin}${FLAGS} %U
 Icon=${icon:-$PKG}
 Terminal=false
 StartupNotify=true
@@ -186,7 +213,7 @@ command -v gtk-update-icon-cache   >/dev/null 2>&1 && gtk-update-icon-cache -qtf
 mkdir -p "${HOME}/.local/bin"
 cat > "${HOME}/.local/bin/fuse" <<WRAP
 #!/bin/sh
-exec ${bin} "\$@"
+exec ${bin}${FLAGS} "\$@"
 WRAP
 chmod +x "${HOME}/.local/bin/fuse"
 
