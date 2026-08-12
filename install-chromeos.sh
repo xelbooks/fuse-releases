@@ -94,11 +94,25 @@ sudo apt-get update -qq || true
 # `apt install ./file.deb` fails inside ChromeOS's Linux VM: apt drops to the
 # unprivileged _apt user to read the file and cannot see into the home
 # directory. dpkg first, then apt to satisfy anything missing, avoids that.
-sudo dpkg -i "${tmp}/${deb}" >/dev/null 2>&1 || true
-sudo apt-get -f install -y  >/dev/null 2>&1 || sudo apt-get -f install -y
+sudo dpkg -i "${tmp}/${deb}" >"${tmp}/dpkg.log" 2>&1 || true
 
-dpkg -s "$PKG" >/dev/null 2>&1 || die "the package did not install. Run this to see why:
-    sudo dpkg -i ${tmp}/${deb}"
+# This fetches anything dpkg left unsatisfied — and it is also allowed to
+# REMOVE packages to satisfy dependencies, including the one just installed.
+# So the state is read afterwards rather than assumed.
+sudo apt-get -f install -y >"${tmp}/apt.log" 2>&1 || true
+
+# `dpkg -s` succeeds for a package that has been REMOVED but still has its
+# config files on disk, which is exactly the state apt leaves behind when it
+# takes a package out. Reading the status field is the only honest check.
+state="$(dpkg-query -W -f='${Status}' "$PKG" 2>/dev/null || true)"
+if [ "$state" != "install ok installed" ]; then
+  printf '%s\n' "${red}Fuse did not stay installed.${off} dpkg reports: ${state:-not present}" >&2
+  printf '%s\n' "" >&2
+  printf '%s\n' "What the installer saw:" >&2
+  tail -n 20 "${tmp}/dpkg.log" "${tmp}/apt.log" >&2
+  printf '%s\n' "" >&2
+  die "send the lines above to team@brandenacity.com and we will sort it out."
+fi
 
 # ---------------------------------------------------------------- locate what it installed
 
@@ -107,6 +121,13 @@ bin="$(printf '%s\n' "$files" | grep -E '^/usr/bin/' | head -n1 || true)"
 [ -n "$bin" ] || bin="$(command -v "$PKG" || true)"
 [ -n "$bin" ] || bin="$(printf '%s\n' "$files" | grep -E "/${PKG}$" | grep '^/opt/' | head -n1 || true)"
 [ -n "$bin" ] || die "installed, but the Fuse program is not where it was expected. Tell us at team@brandenacity.com."
+
+# dpkg's file list is a record of what it put there, not proof it is still
+# there. A launcher entry pointing at a missing program is worse than no entry
+# at all: it looks installed and does nothing.
+[ -x "$bin" ] || die "Fuse records itself as installed, but ${bin} is not on disk.
+    Run this to reinstall it and see the reason:
+      sudo apt-get -y --reinstall install ${PKG}"
 
 # Prefer a big icon: the launcher scales down cleanly and up badly.
 icon="$(printf '%s\n' "$files" | grep -E '/icons/hicolor/[0-9]+x[0-9]+/apps/.*\.png$' \
