@@ -85,7 +85,10 @@ curl -fL --progress-bar -o "${tmp}/${deb}" "$url" || die "the download did not f
 # ---------------------------------------------------------------- install
 
 say "Installing"
-note "You will be asked for the password you set up for Linux."
+# ChromeOS gives its Linux user passwordless sudo, so on a Chromebook this
+# never prompts. Saying it would ask made a successful install read as a step
+# that had somehow been skipped.
+note "If a password is asked for, it is the one you set up for Linux."
 sudo apt-get update -qq || true
 
 # `apt install ./file.deb` fails inside ChromeOS's Linux VM: apt drops to the

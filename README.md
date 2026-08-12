@@ -45,8 +45,9 @@ minutes it opens a black window called Terminal.
 curl -fsSL https://raw.githubusercontent.com/xelbooks/fuse-releases/main/install-chromeos.sh | bash
 ```
 
-It asks for the password you just set up for Linux — typing shows nothing on
-screen, which is normal. [Read the script first](install-chromeos.sh) if you
+Most Chromebooks will not ask for a password; if yours does, it is the one you
+just set up for Linux, and typing shows nothing on screen. [Read the script
+first](install-chromeos.sh) if you
 would rather; it downloads the same build as the table above, installs it, and
 adds Fuse to the launcher.
 
