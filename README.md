@@ -80,7 +80,19 @@ and tell us at team@brandenacity.com.
 
 ## Updating
 
-Installed copies update themselves. You do not need to come back here.
+On **Windows**, and from the **AppImage** on Linux, Fuse updates itself. You do
+not need to come back here.
+
+A **`.deb` install does not** — Debian packages have no mechanism for it, so a
+copy installed that way stays on the version you installed. That covers
+**Chromebooks**, which install from the `.deb`.
+
+Updating one is the same command as installing it. It fetches whatever the
+current version is and installs over the top, keeping your groups and accounts:
+
+```
+curl -fsSL https://raw.githubusercontent.com/xelbooks/fuse-releases/main/install-chromeos.sh | bash
+```
 
 ## About this repository
 
