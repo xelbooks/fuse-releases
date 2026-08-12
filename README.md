@@ -66,6 +66,18 @@ team@brandenacity.com which ChromeOS version you are on.
 Chromebooks with an Intel or AMD processor are covered today. ARM Chromebooks
 are not built yet; the installer says so rather than installing the wrong file.
 
+### Bringing bookmarks and passwords across
+
+Fuse runs on the Linux side of ChromeOS, so it cannot see the Downloads folder
+your Chromebook saves into. Export from your old browser as usual, then open the
+**Files** app, click **Linux files** down the left-hand side, and paste the
+exported file in there. That folder is Fuse's own, so it is waiting in the
+picker when you import.
+
+Some Chromebooks also offer *Share with Linux* when you right-click a folder,
+which keeps everything in it visible from then on. Newer ones have dropped that;
+copying works on all of them.
+
 ## About the Windows warning
 
 The Windows builds are signed by **Xelbooks LLC**, verified by Microsoft, and
