@@ -7,7 +7,10 @@
 # trivial job here says whether the account can get a runner at all, or only
 # private billable jobs are being refused.
 name: Actions canary
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/actions-canary]
 jobs:
   ping:
     runs-on: ubuntu-latest
