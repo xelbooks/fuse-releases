@@ -1,0 +1,15 @@
+# Diagnostic canary — safe to delete, lives only on a throwaway branch.
+#
+# Every job on xelbooks/fuse (private) has been refused at runner assignment
+# since 2026-09-25 00:00 UTC: dead in 2-5 seconds, no logs, no annotations,
+# on workflow files byte-identical to ones that shipped v0.3.93. This repo is
+# public, where Actions minutes are free and no billing gate applies — so one
+# trivial job here says whether the account can get a runner at all, or only
+# private billable jobs are being refused.
+name: Actions canary
+on: workflow_dispatch
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "a runner was assigned and executed a step"
