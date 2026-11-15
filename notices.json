@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "about": "Confirmed security notices for services people use in Fuse. Facts only: each entry names its source. Format of an entry: { id, hosts: [\"example.com\"], title, detail, action, source: { name, url }, published }",
+  "notices": []
+}
